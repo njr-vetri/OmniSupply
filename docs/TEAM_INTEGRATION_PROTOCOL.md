@@ -1,26 +1,14 @@
-\# OmniSupply Team Integration Protocol
+﻿# OmniSupply Team Integration Protocol
 
-
-
-\## 1. Purpose
-
-
+## 1. Purpose
 
 This document defines shared interfaces, file ownership, testing expectations, and integration rules for the two developers working on OmniSupply.
 
-
-
 The goal is to develop demand forecasting, inventory optimization, supplier intelligence, observability, notifications, and automation independently before integrating them.
 
+## 2. Team Responsibilities
 
-
-\## 2. Team Responsibilities
-
-
-
-\### Person A — Predictive Analytics and Automation
-
-
+### Person A â€” Predictive Analytics and Automation
 
 Owns:
 
@@ -36,15 +24,9 @@ Owns:
 
 \- Forecasting, inventory optimization, and pipeline tests.
 
-
-
 Person A must not implement or directly import unfinished Person B modules during independent feature development.
 
-
-
-\### Person B — Supplier Intelligence and Operations
-
-
+### Person B â€” Supplier Intelligence and Operations
 
 Owns:
 
@@ -64,31 +46,17 @@ Owns:
 
 \- Tests for supplier intelligence, observability, and notifications.
 
-
-
-\## 3. Shared Interface Contracts
-
-
+## 3. Shared Interface Contracts
 
 All modules must expose stable, documented interfaces. Use pandas DataFrames for tabular inputs and outputs where appropriate.
 
-
-
-\### 3.1 Demand Forecasting
-
-
+### 3.1 Demand Forecasting
 
 Module: `src/demand\_forecasting/forecaster.py`
 
-
-
 Function:
 
-
-
 `forecast\_demand(sales\_df, item\_col="item\_id", date\_col="date", quantity\_col="quantity", horizon\_days=30)`
-
-
 
 Expected output columns:
 
@@ -99,8 +67,6 @@ Expected output columns:
 \- `predicted\_demand`
 
 \- `model\_name`
-
-
 
 Requirements:
 
@@ -114,23 +80,13 @@ Requirements:
 
 \- Document assumptions and units.
 
-
-
-\### 3.2 Inventory Optimization
-
-
+### 3.2 Inventory Optimization
 
 Module: `src/inventory\_optimization/recommender.py`
 
-
-
 Function:
 
-
-
 `recommend\_replenishment(inventory\_df, forecasts\_df, item\_col="item\_id", stock\_col="current\_stock", lead\_time\_col="lead\_time\_days", target\_cover\_days=30)`
-
-
 
 Expected output columns:
 
@@ -154,8 +110,6 @@ Expected output columns:
 
 \- `reason`
 
-
-
 Requirements:
 
 \- Validate required columns.
@@ -166,23 +120,13 @@ Requirements:
 
 \- Handle missing inventory or forecast information explicitly.
 
-
-
-\### 3.3 Supplier Intelligence
-
-
+### 3.3 Supplier Intelligence
 
 Module: `src/supplier\_intelligence/`
 
-
-
 Function:
 
-
-
 `score\_suppliers(supplier\_metrics\_df, supplier\_col="supplier\_id", metric\_columns=None, weights=None)`
-
-
 
 Expected output should include:
 
@@ -198,8 +142,6 @@ Expected output should include:
 
 \- `data\_coverage`
 
-
-
 Requirements:
 
 \- Document the risk score scale and weighting direction.
@@ -208,15 +150,9 @@ Requirements:
 
 \- Make risk explanations available to downstream reporting.
 
-
-
-\### 3.4 Agent Observability
-
-
+### 3.4 Agent Observability
 
 Module: `src/agent\_observability/`
-
-
 
 Provide an `AgentTraceRecorder` interface supporting:
 
@@ -226,19 +162,11 @@ Provide an `AgentTraceRecorder` interface supporting:
 
 \- `get\_trace(...)`
 
-
-
 The implementation must support a local or test-friendly configuration. External observability services must be optional.
 
-
-
-\### 3.5 Notifications
-
-
+### 3.5 Notifications
 
 Module: `src/notifications/`
-
-
 
 Notification payloads should support:
 
@@ -258,8 +186,6 @@ Notification payloads should support:
 
 \- `recommended\_action`
 
-
-
 Requirements:
 
 \- Default to dry-run mode.
@@ -270,23 +196,13 @@ Requirements:
 
 \- Keep email or other external notification credentials optional for unit tests.
 
-
-
-\### 3.6 Automation Pipeline
-
-
+### 3.6 Automation Pipeline
 
 Module: `src/automation/pipeline.py`
 
-
-
 Provide:
 
-
-
 `run\_pipeline(inputs, services, trigger="manual", run\_id=None, dry\_run=True)`
-
-
 
 Requirements:
 
@@ -302,15 +218,9 @@ Requirements:
 
 \- Require explicit human approval for consequential external actions.
 
-
-
 The pipeline must not import unfinished Person B modules directly during independent development. Integration should connect them through injected service implementations.
 
-
-
-\## 4. File Ownership and Change Rules
-
-
+## 4. File Ownership and Change Rules
 
 1\. Each developer edits only their assigned files during feature development.
 
@@ -326,11 +236,7 @@ The pipeline must not import unfinished Person B modules directly during indepen
 
 7\. Never commit `.env`, API keys, passwords, tokens, or production credentials.
 
-
-
-\## 5. Git Workflow
-
-
+## 5. Git Workflow
 
 1\. Start from an up-to-date `master`.
 
@@ -348,8 +254,6 @@ The pipeline must not import unfinished Person B modules directly during indepen
 
 8\. Never push feature work directly to `master`.
 
-
-
 Suggested branches:
 
 \- `prep/team-contracts`
@@ -360,11 +264,7 @@ Suggested branches:
 
 \- `integration/automation-runtime`
 
-
-
-\## 6. Testing and Dependencies
-
-
+## 6. Testing and Dependencies
 
 \- Unit tests must work with synthetic data and mocked external services.
 
@@ -378,11 +278,7 @@ Suggested branches:
 
 \- Run the existing project tests as well as new tests before merging.
 
-
-
-\## 7. Integration Sequence
-
-
+## 7. Integration Sequence
 
 1\. Merge this protocol preparation pull request.
 
@@ -402,11 +298,7 @@ Suggested branches:
 
 9\. Require human approval before any real external or purchasing action.
 
-
-
-\## 8. Open Decisions
-
-
+## 8. Open Decisions
 
 The team must confirm these details before integration:
 
@@ -426,9 +318,6 @@ The team must confirm these details before integration:
 
 \- The required environment variables and optional integrations.
 
-
-
 Document decisions in pull requests before changing shared contracts.
-
 
 
