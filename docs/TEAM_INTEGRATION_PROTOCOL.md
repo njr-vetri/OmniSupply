@@ -1,4 +1,4 @@
-﻿# OmniSupply Team Integration Protocol
+# OmniSupply Team Integration Protocol
 
 ## 1. Purpose
 
@@ -319,6 +319,3 @@ The team must confirm these details before integration:
 - The required environment variables and optional integrations.
 
 Document decisions in pull requests before changing shared contracts.
-
-
-
