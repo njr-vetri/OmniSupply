@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniSupply - Multi-Agent Supply Chain Intelligence</title>
+  <meta name="description" content="Enterprise AI Multi-Agent Platform for Supply Chain Intelligence, Risk Analysis, and Executive Reporting.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <h1 class="brand-title">OmniSupply</h1>
+      <span class="brand-badge">Multi-Agent AI</span>
+    </div>
+    
+    <div class="nav-actions">
+      <div class="status-pill" id="system-status-pill">
+        <span class="pulse-dot"></span>
+        <span id="system-status-text">Agents Operational</span>
+      </div>
+      <a href="/docs" target="_blank" class="api-link" title="Open Swagger API documentation">
+        <span>📖 API Docs</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+    
+    <!-- Top KPI Grid -->
+    <section class="kpi-grid">
+      <div class="kpi-card" style="--card-accent: #6366f1;">
+        <div class="kpi-header">
+          <span class="kpi-title">Gross Revenue</span>
+          <span class="kpi-icon">💰</span>
+        </div>
+        <div class="kpi-value" id="kpi-revenue">$18,429,150</div>
+        <div class="kpi-meta">
+          <span class="trend-up">↑ +8.4%</span> vs previous quarter
+        </div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: #06b6d4;">
+        <div class="kpi-header">
+          <span class="kpi-title">Orders Processed</span>
+          <span class="kpi-icon">📦</span>
+        </div>
+        <div class="kpi-value" id="kpi-orders">65,752</div>
+        <div class="kpi-meta">
+          <span class="trend-up">↑ 98.2%</span> fulfillment rate
+        </div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: #10b981;">
+        <div class="kpi-header">
+          <span class="kpi-title">On-Time Delivery</span>
+          <span class="kpi-icon">⏱️</span>
+        </div>
+        <div class="kpi-value" id="kpi-delivery">92.4%</div>
+        <div class="kpi-meta">
+          <span class="trend-up">↑ +2.1%</span> carrier efficiency
+        </div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: #f59e0b;">
+        <div class="kpi-header">
+          <span class="kpi-title">Supply Chain Risk</span>
+          <span class="kpi-icon">🛡️</span>
+        </div>
+        <div class="kpi-value" id="kpi-risk">0.24 (Low)</div>
+        <div class="kpi-meta">
+          <span class="trend-down">↓ -12%</span> delay incidents
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Two-Column Dashboard Grid -->
+    <div class="dashboard-grid">
+      
+      <!-- Left Column: Agent Command Center -->
+      <section class="card">
+        <div class="card-title-row">
+          <div>
+            <h2 class="card-title">🤖 Multi-Agent Command Center</h2>
+            <p class="card-subtitle">Dispatch queries across specialized domain agents with LangGraph orchestration</p>
+          </div>
+        </div>
+
+        <!-- Agent Selector Tabs -->
+        <div class="agent-pills" id="agent-selector">
+          <button class="agent-btn active" data-agent="supervisor">🌐 Supervisor (All Agents)</button>
+          <button class="agent-btn" data-agent="data_analyst">📊 Data Analyst</button>
+          <button class="agent-btn" data-agent="risk_agent">⚠️ Risk Agent</button>
+          <button class="agent-btn" data-agent="finance_agent">💵 Finance Insight</button>
+          <button class="agent-btn" data-agent="meeting_agent">📝 Meeting & Report</button>
+          <button class="agent-btn" data-agent="email_agent">✉️ Email & Workflow</button>
+        </div>
+
+        <!-- Query Input & Preset Chips -->
+        <div class="query-box-container">
+          <div class="query-input-wrap">
+            <input 
+              type="text" 
+              id="query-input" 
+              class="query-input" 
+              placeholder="Ask OmniSupply (e.g. 'Analyze top product sales and highlight delivery risks')..."
+              autocomplete="off"
+            >
+            <button id="send-btn" class="send-btn">
+              <span>Run Query</span>
+              <span>→</span>
+            </button>
+          </div>
+
+          <!-- Quick Chips -->
+          <div class="chip-row">
+            <span class="chip" data-prompt="Analyze sales revenue and detect any margin anomalies across regions">📊 Sales & Margin Trends</span>
+            <span class="chip" data-prompt="Assess high-risk shipment delays and critical inventory shortages">⚠️ Delivery & Stock Risks</span>
+            <span class="chip" data-prompt="Summarize quarterly P&L components and forecast operating cashflow">💵 P&L & Cashflow Forecast</span>
+            <span class="chip" data-prompt="Generate weekly CxO executive briefing with top 3 strategic recommendations">📝 CxO Executive Briefing</span>
+          </div>
+        </div>
+
+        <!-- Agent Response Container -->
+        <div class="response-container" id="response-output">
+          <div class="placeholder-state" id="placeholder-view">
+            <div class="placeholder-icon">💬</div>
+            <p><strong>Ready for Intelligence Queries</strong></p>
+            <p style="font-size: 0.8rem;">Select an agent or choose a sample question above to begin analysis.</p>
+          </div>
+
+          <div id="result-view" style="display: none; flex-direction: column; gap: 1rem;">
+            <div class="response-header">
+              <span class="agent-tag" id="res-agent-badge">Agent: Supervisor</span>
+              <span class="exec-time" id="res-exec-time">Execution: 0ms</span>
+            </div>
+
+            <div>
+              <h4 style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.5rem; text-transform: uppercase;">Key Insights</h4>
+              <div class="insight-list" id="res-insights-list"></div>
+            </div>
+
+            <div>
+              <h4 style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.5rem; text-transform: uppercase;">Recommended Actions</h4>
+              <div class="rec-list" id="res-rec-list"></div>
+            </div>
+
+            <div id="res-metrics-section" style="display: none;">
+              <h4 style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.5rem; text-transform: uppercase;">Extracted Metrics</h4>
+              <pre id="res-metrics-json" style="background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 8px; font-size: 0.8rem; overflow-x: auto; color: #38bdf8;"></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Risk Radar & Real-Time Alerts -->
+      <aside class="widget-section">
+        
+        <!-- Risk Radar Widget -->
+        <div class="card">
+          <div class="card-title-row">
+            <h3 class="card-title">📡 Supply Chain Risk Radar</h3>
+            <span style="font-size: 0.75rem; color: #10b981; font-weight: 600;">ACTIVE MONITOR</span>
+          </div>
+
+          <div class="risk-bars">
+            <div class="risk-bar-item">
+              <div class="risk-bar-labels">
+                <span>Delivery & Logistics Risk</span>
+                <span id="risk-delivery-val">32%</span>
+              </div>
+              <div class="risk-bar-track">
+                <div class="risk-bar-fill" style="width: 32%; background: #f59e0b;"></div>
+              </div>
+            </div>
+
+            <div class="risk-bar-item">
+              <div class="risk-bar-labels">
+                <span>Inventory Depletion Risk</span>
+                <span id="risk-inventory-val">18%</span>
+              </div>
+              <div class="risk-bar-track">
+                <div class="risk-bar-fill" style="width: 18%; background: #10b981;"></div>
+              </div>
+            </div>
+
+            <div class="risk-bar-item">
+              <div class="risk-bar-labels">
+                <span>Quality & Returns Risk</span>
+                <span id="risk-quality-val">24%</span>
+              </div>
+              <div class="risk-bar-track">
+                <div class="risk-bar-fill" style="width: 24%; background: #06b6d4;"></div>
+              </div>
+            </div>
+
+            <div class="risk-bar-item">
+              <div class="risk-bar-labels">
+                <span>Cashflow / Financial Risk</span>
+                <span id="risk-finance-val">12%</span>
+              </div>
+              <div class="risk-bar-track">
+                <div class="risk-bar-fill" style="width: 12%; background: #6366f1;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Alerts Widget -->
+        <div class="card">
+          <div class="card-title-row">
+            <h3 class="card-title">🚨 Active Risk Alerts</h3>
+            <span style="font-size: 0.75rem; color: #f43f5e; font-weight: 600;">3 PENDING</span>
+          </div>
+
+          <div class="alert-feed">
+            <div class="alert-card warning">
+              <span class="alert-icon">⚠️</span>
+              <div class="alert-content">
+                <span class="alert-title">Carrier Transit Delay Notice</span>
+                <span class="alert-desc">Port of Long Beach route experiencing +2.8 days average delay. 14 shipments affected.</span>
+              </div>
+            </div>
+
+            <div class="alert-card critical">
+              <span class="alert-icon">🔴</span>
+              <div class="alert-content">
+                <span class="alert-title">Stock Reorder Threshold Reached</span>
+                <span class="alert-desc">SKU-00412 (Industrial Sensors) below 15 units. Reorder triggered via Email Agent.</span>
+              </div>
+            </div>
+
+            <div class="alert-card info">
+              <span class="alert-icon">ℹ️</span>
+              <div class="alert-content">
+                <span class="alert-title">Quarterly Margin Optimization</span>
+                <span class="alert-desc">Data Analyst identified 4.2% discount leakage on Consumer Segment orders.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>OmniSupply AI Multi-Agent Platform &copy; 2026 • Powered by LangGraph, PostgreSQL, and Comet Opik</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
