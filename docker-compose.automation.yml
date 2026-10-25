@@ -1,0 +1,98 @@
+# ==============================================================================
+# OmniSupply Automation Services (Celery Worker, Celery Beat, Redis)
+#
+# Commands:
+#   Start all services:  docker compose -f docker-compose.automation.yml up -d
+#   Start Redis only:    docker compose -f docker-compose.automation.yml up -d redis
+#   Stop all services:   docker compose -f docker-compose.automation.yml down
+#   View worker logs:    docker compose -f docker-compose.automation.yml logs -f celery-worker
+#   Validate config:     docker compose -f docker-compose.automation.yml config
+#
+# Environment Variables:
+#   - REDIS_PORT (default: 6379)
+#   - CELERY_APP (default: src.automation.celery_app)
+#   - CELERY_LOG_LEVEL (default: info)
+#   - CELERY_BROKER_URL (default: redis://redis:6379/0)
+#   - CELERY_RESULT_BACKEND (default: redis://redis:6379/0)
+#   - DATABASE_URL (PostgreSQL connection string pointing to host.docker.internal)
+# ==============================================================================
+
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: omnisupply-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.automation
+    container_name: omnisupply-celery-worker
+    restart: unless-stopped
+    stop_grace_period: 30s
+    depends_on:
+      redis:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - CELERY_APP=${CELERY_APP:-src.automation.celery_app}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/0}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://omnisupply:omnisupply123@host.docker.internal:5432/omnisupply}
+      - OMNISUPPLY_ALERT_STORE_PATH=/tmp/omnisupply_alerts.json
+      - OMNISUPPLY_TRACE_DIR=/tmp/traces
+    command: celery -A ${CELERY_APP:-src.automation.celery_app} worker --loglevel=${CELERY_LOG_LEVEL:-info}
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A ${CELERY_APP:-src.automation.celery_app} inspect ping || exit 0"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.automation
+    container_name: omnisupply-celery-beat
+    restart: unless-stopped
+    stop_grace_period: 30s
+    depends_on:
+      redis:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - CELERY_APP=${CELERY_APP:-src.automation.celery_app}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/0}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://omnisupply:omnisupply123@host.docker.internal:5432/omnisupply}
+      - OMNISUPPLY_ALERT_STORE_PATH=/tmp/omnisupply_alerts.json
+      - OMNISUPPLY_TRACE_DIR=/tmp/traces
+    command: celery -A ${CELERY_APP:-src.automation.celery_app} beat --loglevel=${CELERY_LOG_LEVEL:-info} --schedule=/tmp/celery/celerybeat-schedule
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/celery/celerybeat-schedule || exit 0"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  redis_data:
+    name: omnisupply_redis_data

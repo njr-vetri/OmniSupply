@@ -1,0 +1,65 @@
+name: OmniSupply CI
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Lint & Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      PYTHONUNBUFFERED: "1"
+      OPENAI_API_KEY: "dummy-key-for-tests"
+      DATABASE_URL: "duckdb:///:memory:"
+      OMNISUPPLY_ALERT_STORE_PATH: "/tmp/ci_alerts.json"
+      OMNISUPPLY_TRACE_DIR: "/tmp/ci_traces"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies with uv
+        run: uv sync --frozen --no-dev || uv sync --no-dev || uv sync
+
+      - name: Run Ruff check on Person B owned modules (Blocking)
+        run: >
+          uv run ruff check
+          src/supplier_intelligence
+          src/agent_observability
+          src/notifications
+          tests/test_supplier_intelligence.py
+          tests/test_agent_observability.py
+          tests/test_notifications.py
+
+      - name: Run Ruff check across entire repository (Non-blocking)
+        continue-on-error: true
+        run: uv run ruff check .
+
+      - name: Run pytest test suite
+        run: uv run pytest tests/ -v
